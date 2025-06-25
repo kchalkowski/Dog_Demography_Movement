@@ -1,4 +1,4 @@
 **/.DS_Store
-./Scripts/*.R
-./Data/cellnums.csv
-./Data/*.tif
+Scripts/*.R
+Data/cellnums.csv
+Data/*.tif
