@@ -12,7 +12,6 @@ tar_manifest()
 #Make pipeline
 tar_make()
 
-#tar_visnetwork()
 
 
 metadat=tar_read(metadat)
@@ -23,8 +22,13 @@ vpol2=tar_read(vpol2)
 startlocs<-tar_read(startlocs)
 geosf<-tar_read(geosf)
 geosf2<-tar_read(geosf2)
-#plot(vpol)
 lands<-tar_read(lands)
 compareCRS(crs(vpol2),crs(geosf))
 dogvils<-tar_read(dogvils)
+geo2<-tar_read(geo2)
+geo4<-tar_read(geo4)
+trk2<-tar_read(trk2)
+
+
+
 

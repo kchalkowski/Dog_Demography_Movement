@@ -26,7 +26,8 @@ tar_option_set(packages = c("Rcpp",
                             "dplyr",
                             "sf",
                             "raster",
-                            "terra"))
+                            "terra",
+														"amt"))
 
 # Pipeline ---------------------------------------------------------
 
@@ -88,6 +89,11 @@ list(
 
 	## Join data -----
   tar_target(dogvils,JoinVillageData(vil, vpol2, startlocs, lands)),
-	tar_target(geo2,JoinGeolocationVillages(geo,dogvils))#,
-
+	tar_target(geo2,JoinGeolocationVillages(geo,dogvils)),
+	tar_target(geo4,JoinGeolocationLC(geo2,lands)),
+	
+	## Analyze movement -----
+	tar_target(trk2,ResampleGeolocations(geo4)),
+	tar_target(dog_trk_models,RunSSF(trk2,lands))#,
+	
   )

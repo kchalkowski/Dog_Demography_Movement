@@ -118,10 +118,78 @@ JoinVillageData<-function(villages, vpol2, startlocs, lands){
 
 JoinGeolocationVillages<-function(geo,dogvils){
 	colnames(geo)[which(colnames(geo)=="ID")]<-"Dog"
-	dogvils
+	#dogvils
 	geo2=left_join(geo,dogvils,by="Dog")
+	geo2<-st_drop_geometry(geo2)
+	geo2<-geo2[,1:8]
 	return(geo2)
 	}
 
+JoinGeolocationLC<-function(geo2,lands){
+	geo3<-st_as_sf(geo2,coords=c(5,4),crs=st_crs(4326))
+	geo4<-st_transform(geo3,crs=st_crs(lands))
+	lcvals=terra::extract(lands,st_coordinates(geo4))
+	colnames(lcvals)="lc"
+	geo4$lc=lcvals$lc
+	geo4=geo4[,c(1:6,8,7)]
+	return(geo4)
+	}
 
+# Resample data ------
+ResampleGeolocations<-function(geo4){
+	
+	#format for make track
+	geo4$x=st_coordinates(geo4)[,1]
+	geo4$y=st_coordinates(geo4)[,2]
+	geo4$date=as.Date(geo4$date,"%d/%m/%y")
+	
+	#remove NA datetimes
+	geo4=geo4[!is.na(geo4$date),]
+	
+	geo4$datetime=paste0(geo4$date," ",geo4$time)
+	geo4$datetime=Neat.Dates.POSIXct(geo4$datetime,tz="Indian/Antananarivo")
+	trk=make_track(geo4,x,y,datetime,all_cols=TRUE,crs=st_crs(geo4))
+	ssr=summarize_sampling_rate(trk)
+	trk2=trk |> track_resample(rate = minutes(ssr$median), tolerance = minutes(as.integer(ssr$median*0.3)))
+	return(trk2)
+	}
+
+# RunSSF ------
+RunSSF<-function(trk2,lands){
+	#Nest data by ID
+	trk3 <- trk2 |> nest(data = -"Dog")
+	trk3=trk3 |> 
+  mutate(steps = map(data, function(x) 
+    x |> steps_by_burst()))
+	
+	trk3=trk3 |> 
+  mutate(nrow = map(steps, function(x) 
+    x |> nrow()))
+	
+	tfil=trk3[trk3$nrow>=40,]
+	
+	landfor=lands
+	landfor[landfor==5]<-0 #open
+	landfor[landfor==4]<-0 #open
+	landfor[landfor==2]<-4 #scrub/fallow
+	landfor[landfor==3]<-4 #scrub/fallow
+	landfor[landfor==1]<-5 #forest
+	#recode to make sense, levels in order
+	landfor[landfor==4]<-1 #scrub/fallow
+	landfor[landfor==5]<-2 #forest
+	
+	tfil <- tfil |> mutate(randomsteps = map(steps, function(x)
+		x |> random_steps(n_control=15) |> 
+			extract_covariates(landfor)
+	))
+	
+tfil <- tfil |> mutate(models = map(randomsteps, function(x)
+		x |> fit_clogit(case_ ~ factor(ZOI2_LU_classification_39s1) + strata(step_id_))
+	))
+	
+dog_trk_models=tfil |> select(Dog,models)
+
+return(dog_trk_models)
+
+	}
 
