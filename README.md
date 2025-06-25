@@ -23,11 +23,8 @@
 ### Movement Analysis 
 1. Resample geolocation data
 2. Run integrated step-selection function for each individual on resampled tracks
-3. Compare resource preference coefficients for forest and open for each dog...    
-	a. between villages.   
-	b. within housing densities.   
-	c. with varying distance to Andasibe.   
-	d. with distance from forest.   
+3. Compare resource preference coefficients for forest vs open vs shrub/scrub for each dog between villages, across housing densities, with varying distance to Andasibe, with distance from forest.   
+	a. Pull model coefficient means + 95% CI.... create forest plots with grouped data
 
 ### Home range Analysis    
 1. Run CTMMs for each individual
