@@ -1,0 +1,3 @@
+main:
+  script: /Users/kchalkowski/Dropbox/2_Research/2_Projects/1_Working_Projects/Dog_Movement_Demography/Pipeline/_targets.R
+  store: /Users/kchalkowski/Dropbox/2_Research/2_Projects/1_Working_Projects/Dog_Movement_Demography/Pipeline/_targets
