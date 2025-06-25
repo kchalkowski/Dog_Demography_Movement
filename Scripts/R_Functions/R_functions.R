@@ -30,15 +30,12 @@ TidyVil<-function(vil){
 		]
 }
 
-TidyVpol<-function(vpol){
+TidyVpol<-function(vpol,vil){
 	vpol[,which(colnames(vil)=="Name")]
 }
 
 
 # Format data ------
-#crs_num=4326
-#xcol=5
-#ycol=4
 Format_SF<-function(geo,crs_num,xcol,ycol){
 	sf::st_as_sf(geo,coords=c(xcol,ycol),crs=st_crs(crs_num))
 }
@@ -82,24 +79,49 @@ Transform_SF<-function(geo,crs_num){
 
 # Join data ------
 
-IntersectLayers<-function(startlocs, vpol2){
+JoinVillageData<-function(villages, vpol2, startlocs, lands){
 	vpol3=sf::st_zm(vpol2)
-	svil=sf::st_intersection(startlocs, vpol3)
-	svil=st_drop_geometry(svil[,c(1,2)])
+	vpol4<-st_transform(vpol3,crs=st_crs(lands))
+	villages<-st_as_sf(villages,coords=c("x","y"),crs=st_crs(lands))
+	startlocs2<-st_transform(startlocs,crs=st_crs(lands))
 	
-	no_int=which(!(startlocs$ID%in%svil$ID))
-	no_int_locs=data.frame("ID"=startlocs$ID[no_int],"Name"=c(442,466,484,466))
-	dogvils=rbind(svil,no_int_locs)
-	return(dogvils)
+	#join village polygons to village info
+	#vpol_info<-st_intersection(villages,vpol4)
+
+	#Note: not all polygons are picked up in this intersection-- due to shapes of polygons, some don't overlap with the centroid
+	#purpose of this is to intersect with dog origins anyways, so this isn't a problem unless a dog village is one that wasn't picked up
+	#dogvils<-st_(startlocs2,vpol4)
+	
+	#Join village polygons with dog names (startlocs2)
+	startvil_indices=st_nearest_feature(startlocs2,vpol4)
+	startvils=vpol4[startvil_indices,]
+	startvils$Dog=startlocs2$ID
+	
+	#Join dog village polygons with village polygons
+	vill_0<-st_nearest_feature(startvils,villages)
+	#vil_indices=which(vill_indices==min(vill_indices))
+	
+	dogvils=villages[vill_0,]
+	startvils$Houses<-dogvils$Houses
+	startvils$VilName<-dogvils$Name
+	
+	#Get distance to Andasibe (row 397) for each dog origin village
+	Andasibe<-vpol4[397,]
+	startvils$Andasibe_m=st_distance(startvils,Andasibe)
+	
+	#reorganize so that geometry at end column
+	dogvils_out<-startvils[,c(3,4,5,6,2)]
+	
+	return(dogvils_out)
+	
 }
 
+JoinGeolocationVillages<-function(geo,dogvils){
+	colnames(geo)[which(colnames(geo)=="ID")]<-"Dog"
+	dogvils
+	geo2=left_join(geo,dogvils,by="Dog")
+	return(geo2)
+	}
 
-#didn't intersect, should be is below
-#Bojira, 442
-#Fox, 466
-#Poky, 484
-#Regarde, 466
-
-#which(!(st_is_valid(vpol2)))
 
 

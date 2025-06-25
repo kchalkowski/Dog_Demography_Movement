@@ -6,16 +6,25 @@
 
 ## Pipeline Overview   
 
-### Processing    
-1. Link spatial village polygons to village data
-2. Determine distance to Andasibe for each polygon
-3. Join dog geolocation data to village metadata based on dog collaring location
-4. Join dog geolocation data to land cover data
+### Data 
+1. 
 
-### Analysis    
-1. Run integrated step-selection function for each individual-- pull distribution of RSF coefs
-2. Compare resource preference coefficients for forest and open for each dog...
+### Processing    
+1. Pull in all data objects
+2. Link spatial village polygons to village data
+3. Determine distance to Andasibe for each polygon
+4. Join dog geolocation data to village metadata based on dog collaring location
+5. Join dog geolocation data to land cover data
+
+### Movement Analysis 
+1. Resample geolocation data
+2. Run integrated step-selection function for each individual on resampled tracks
+3. Compare resource preference coefficients for forest and open for each dog...    
 	a. between villages
 	b. within housing densities
 	c. with varying distance to Andasibe
 	d. with distance from forest
+
+### Home range Analysis    
+1. Run CTMMs for each individual
+2. Determine home range size... other stuff?

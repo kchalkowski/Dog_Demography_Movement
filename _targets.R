@@ -22,12 +22,6 @@ lapply(list.files(file.path("Scripts","R_Functions"), full.names = TRUE, recursi
 
 #Load packages
 tar_option_set(packages = c("Rcpp",
-                            "R.matlab",
-                            "pracma",
-                            "rdist",
-                            "tidyverse",
-                            "RcppArmadillo",
-                            "RcppParallel",
                             "stringr",
                             "dplyr",
                             "sf",
@@ -77,15 +71,14 @@ list(
 	### Input land cover raster: -----------
 	tar_terra_rast(lands, ReadLands(land_path)), 
 	
-	## Read and format polygons: -----------
+	## Read and format village polygons: -----------
   tar_target(vpol0, ReadPoly(vpol_path)),
 	
 	## Tidy data: -----------
 	tar_target(metadat, TidyMetadat(metadat0)),
 	tar_target(geo, TidyGeo(geo0)),
 	tar_target(vil, TidyVil(vil0)),
-	tar_target(vpol, TidyVpol(vpol0)),
-	
+	tar_target(vpol, TidyVpol(vpol0,vil)),
 	
   ## Formatting -----
   tar_target(geosf,Format_SF(geo,4326,5,4)),
@@ -94,7 +87,7 @@ list(
   tar_target(vpol2,MakeValidSF(vpol)),
 
 	## Join data -----
-  tar_target(dogvils,IntersectLayers(startlocs, vpol2))#,
-	
+  tar_target(dogvils,JoinVillageData(vil, vpol2, startlocs, lands)),
+	tar_target(geo2,JoinGeolocationVillages(geo,dogvils))#,
 
   )
